@@ -1,85 +1,60 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv').config();
+const cors = require('cors');
+const salesRoutes = require('./routes/salesRoutes');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(express.json()); // Parse JSON requests
-app.use(cors()); // Enable CORS for frontend communication
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+app.use(cors());
 
-// ✅ Connect to MongoDB (Local Database)
-mongoose.connect("mongodb://localhost:27017/salesDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log("✅ MongoDB connected successfully (Local DB)"))
-.catch((err) => console.error("❌ MongoDB connection error:", err));
-
-// ✅ Define Sales Schema & Model
-const saleSchema = new mongoose.Schema({
-  product: { type: String, required: true },
-  price: { type: Number, required: true },
-  quantity: { type: Number, required: true }
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('✅ MongoDB Connected');
+}).catch(err => {
+    console.log('❌ MongoDB Connection Failed:', err);
 });
 
-const Sale = mongoose.model("Sale", saleSchema);
+// Swagger Configuration
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Sales Management API',
+            version: '1.0.0',
+            description: 'API documentation for managing sales records'
+        },
+        servers: [
+            {
+                url: 'http://localhost:5000'
+            }
+        ]
+    },
+    apis: ['./routes/*.js']
+};
 
-// ✅ Root Route (Fixes "Cannot GET /")
-app.get("/", (req, res) => {
-  res.send("✅ Sales API is running...");
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Home Route
+app.get('/', (req, res) => {
+    res.send(`
+        <h1>🚀 Sales Management API</h1>
+        <p><a href="/api-docs">Go to API Documentation</a></p>
+    `);
 });
 
-// ✅ Create Sale (POST /sales)
-app.post("/sales", async (req, res) => {
-  try {
-    const { product, price, quantity } = req.body;
+// Routes
+app.use('/api/sales', salesRoutes);
 
-    // Validation check
-    if (!product || !price || !quantity) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    const newSale = new Sale({ product, price, quantity });
-    await newSale.save();
-    
-    res.status(201).json(newSale);
-  } catch (error) {
-    console.error("❌ Error adding sale:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-// ✅ Get All Sales (GET /sales)
-app.get("/sales", async (req, res) => {
-  try {
-    const sales = await Sale.find();
-    res.json(sales);
-  } catch (error) {
-    console.error("❌ Error retrieving sales:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-// ✅ Delete Sale (DELETE /sales/:id)
-app.delete("/sales/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const deletedSale = await Sale.findByIdAndDelete(id);
-    
-    if (!deletedSale) {
-      return res.status(404).json({ message: "Sale not found" });
-    }
-
-    res.json({ message: "Sale deleted successfully" });
-  } catch (error) {
-    console.error("❌ Error deleting sale:", error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-});
-
-// ✅ Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+// Start Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));

@@ -1,69 +1,67 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
-function SalesForm({ onSaleAdded }) {
-  const [product, setProduct] = useState("");
+function AddSaleForm() {
+  const [productName, setProductName] = useState("");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent page reload
 
-    // Validate input
-    if (!product || !price || !quantity) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    const newSale = { product, price: Number(price), quantity: Number(quantity) };
-
+    // Send data to backend
     try {
-      const response = await fetch("http://localhost:5000/sales", {
+      const response = await fetch("http://localhost:5000/api/sales", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSale),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productName: productName,
+          price: price,
+          quantity: quantity,
+        }),
       });
 
       if (response.ok) {
-        console.log("✅ Sale added successfully!");
-        setProduct("");
+        alert("✅ Sale added successfully!");
+        setProductName("");
         setPrice("");
         setQuantity("");
-        onSaleAdded(); // Refresh sales list
       } else {
-        console.error("❌ Failed to add sale");
+        alert("❌ Failed to add sale. Please try again.");
       }
     } catch (error) {
-      console.error("⚠️ Error adding sale:", error);
+      console.error("Error:", error);
+      alert("❌ Something went wrong.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add New Sale</h2>
-      <input
-        type="text"
-        placeholder="Product Name"
-        value={product}
-        onChange={(e) => setProduct(e.target.value)}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Price"
-        value={price}
-        onChange={(e) => setPrice(e.target.value)}
-        required
-      />
-      <input
-        type="number"
-        placeholder="Quantity"
-        value={quantity}
-        onChange={(e) => setQuantity(e.target.value)}
-        required
-      />
-      <button type="submit">Add Sale</button>
-    </form>
+    <div>
+      <h2>Add Sale</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Product Name"
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(e.target.value)}
+        />
+        <button type="submit">Add Sale</button>
+      </form>
+    </div>
   );
 }
 
-export default SalesForm;
+export default AddSaleForm;

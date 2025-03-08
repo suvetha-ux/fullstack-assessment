@@ -1,23 +1,80 @@
 const express = require('express');
 const router = express.Router();
-const salesController = require('../controllers/salesController'); // Ensure this file exists
+const Sale = require('../models/Sales.js');
 
-// Create a new sales record
-router.post('/', salesController.createSale);
+// @desc    Create a new sale
+// @route   POST /api/sales
+// @access  Public
+router.post('/', async (req, res) => {
+    const { productName, quantity, price } = req.body;
 
-// Retrieve all sales records
-router.get('/', salesController.getAllSales);
+    if (!productName || !quantity || !price) {
+        return res.status(400).json({ message: 'All fields are required' });
+    }
 
-// Retrieve a specific sales record by ID
-router.get('/:id', salesController.getSaleById);
+    try {
+        const sale = await Sale.create({ productName, quantity, price });
+        res.status(201).json(sale);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to add sale. Please try again.' });
+    }
+});
 
-// Update a sales record (full update)
-router.put('/:id', salesController.updateSale);
+// @desc    Get all sales
+// @route   GET /api/sales
+// @access  Public
+router.get('/', async (req, res) => {
+    try {
+        const sales = await Sale.find();
+        res.status(200).json(sales);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch sales' });
+    }
+});
 
-// Partially update a sales record
-router.patch('/:id', salesController.partialUpdateSale);
+// @desc    Get a sale by ID
+// @route   GET /api/sales/:id
+// @access  Public
+router.get('/:id', async (req, res) => {
+    try {
+        const sale = await Sale.findById(req.params.id);
+        if (!sale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
+        res.status(200).json(sale);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch sale' });
+    }
+});
 
-// Delete a sales record
-router.delete('/:id', salesController.deleteSale);
+// @desc    Update a sale by ID
+// @route   PUT /api/sales/:id
+// @access  Public
+router.put('/:id', async (req, res) => {
+    try {
+        const sale = await Sale.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!sale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
+        res.status(200).json(sale);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update sale' });
+    }
+});
+
+// @desc    Delete a sale by ID
+// @route   DELETE /api/sales/:id
+// @access  Public
+router.delete('/:id', async (req, res) => {
+    try {
+        const sale = await Sale.findByIdAndDelete(req.params.id);
+        if (!sale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
+        res.status(200).json({ message: 'Sale deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to delete sale' });
+    }
+});
 
 module.exports = router;

@@ -1,15 +1,11 @@
-import { useState } from "react";
-import SalesForm from "./SalesForm";
-import SalesList from "./SalesList";
+import React from 'react';
+import AddSale from './components/AddSale';
 
 function App() {
-  const [refresh, setRefresh] = useState(false);
-
   return (
     <div>
       <h1>Sales Management App</h1>
-      <SalesForm onSaleAdded={() => setRefresh(!refresh)} />
-      <SalesList key={refresh} />
+      <AddSale />
     </div>
   );
 }
