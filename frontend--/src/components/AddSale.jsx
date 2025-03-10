@@ -1,40 +1,36 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
-function AddSale() {
+function AddSale({ onSaleAdded }) {
   const [productName, setProductName] = useState('');
-  const [price, setPrice] = useState('');
   const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!productName || !price || !quantity) {
-      alert("All fields are required");
+    
+    if (!productName || !quantity || !price) {
+      alert('All fields are required');
       return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/sales', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ productName, price, quantity })
+      const response = await axios.post('http://localhost:5000/api/sales', {
+        productName,
+        quantity: parseInt(quantity),  // Ensure quantity is a number
+        price: parseFloat(price)       // Ensure price is a float
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.status === 201) {
         alert('Sale added successfully');
+        onSaleAdded();  // Refresh sales list after adding
         setProductName('');
-        setPrice('');
         setQuantity('');
-      } else {
-        alert(data.message || 'Failed to add sale. Please try again');
+        setPrice('');
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to add sale. Please try again');
+      console.error('Failed to add sale:', error.response?.data?.message || error.message);
+      alert('Failed to add sale. Please try again.');
     }
   };
 
@@ -51,19 +47,19 @@ function AddSale() {
           />
         </div>
         <div>
-          <label>Price:</label>
-          <input 
-            type="number" 
-            value={price} 
-            onChange={(e) => setPrice(e.target.value)} 
-          />
-        </div>
-        <div>
           <label>Quantity:</label>
           <input 
             type="number" 
             value={quantity} 
             onChange={(e) => setQuantity(e.target.value)} 
+          />
+        </div>
+        <div>
+          <label>Price:</label>
+          <input 
+            type="number" 
+            value={price} 
+            onChange={(e) => setPrice(e.target.value)} 
           />
         </div>
         <button type="submit">Add Sale</button>

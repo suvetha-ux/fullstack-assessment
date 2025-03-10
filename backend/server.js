@@ -5,6 +5,7 @@ const cors = require('cors');
 const salesRoutes = require('./routes/salesRoutes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const path = require('path');
 
 const app = express();
 
@@ -38,7 +39,7 @@ const swaggerOptions = {
             }
         ]
     },
-    apis: ['./routes/*.js']
+    apis: [path.join(__dirname, './routes/*.js')] // This will correctly find the route files
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
