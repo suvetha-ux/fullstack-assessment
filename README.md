@@ -1,63 +1,38 @@
-# Sales Management App
+# Sales Management App  
 
-This is a full-stack project built with Node.js, Express.js, React.js, and MongoDB for managing sales records. The backend is secured using JWT authentication, and the frontend allows users to add, retrieve, and manage sales records.
+## 📜 Project Overview  
+This is a simple *Sales Management Application* built with:  
+- *Backend:* Node.js, Express.js, MongoDB (secured with JWT authentication)  
+- *Frontend:* React.js with React Router DOM and Axios  
 
-## Project Setup
+The application allows you to:  
+- *Login* with a username and password.  
+- *Add Sales* with product name, price, and quantity.  
+- *View Sales List* with options to *View, **Edit, and **Delete* sales records.  
+- *Perform CRUD Operations* directly linked to the database.  
 
-### Backend Setup
+## 📂 Project Structure  
+### *Backend (backend/)*  
+- server.js: Main server file.  
+- routes/: Contains salesRoutes.js and authRoutes.js.  
+- controllers/: Handles logic for sales and authentication.  
+- models/: Contains the Sales.js model.  
+- .env: Environment variables for MongoDB URI, PORT, JWT_SECRET.  
 
-1. Clone the repository.
-2. Navigate to the backend/ directory.
-3. Install the required dependencies:
-    bash
-    npm install
-    
-4. Set up environment variables by creating a .env file in the backend/ directory with the following:
-    
-    PORT=5000
-    JWT_SECRET=your_secret_key
-    
-5. Start the backend server:
-    bash
-    npm start
-    
+### *Frontend (frontend/src/)*  
+- pages/:  
+  - Login.jsx → Handles login functionality.  
+  - SalesManagement.jsx → Handles displaying sales records and performing actions.  
+- components/:  
+  - AddSale.jsx → Form to add a new sale.  
+  - ViewSale.jsx → Page to view sale details.  
+  - EditSale.jsx → Form to edit sale details.  
+- App.jsx → Handles routes using React Router DOM.  
 
-### Frontend Setup
+---
 
-1. Navigate to the frontend/ directory.
-2. Install the required dependencies:
-    bash
-    npm install
-    
-3. Start the frontend server:
-    bash
-    npm start
-    
-
-## API Documentation
-
-All API endpoints are documented using Swagger (OpenAPI). To view the API documentation:
-
-1. Navigate to http://localhost:5000/api-docs.
-
-## API Endpoints
-
-- *POST /sales* - Create a new sales record.
-- *GET /sales* - Retrieve all sales records.
-- *GET /sales/{id}* - Retrieve a specific sales record by ID.
-- *DELETE /sales/{id}* - Delete a sales record.
-- *PUT /sales/{id}* - Update a sales record (full update).
-- *PATCH /sales/{id}* - Update specific fields of a sales record (partial update).
-
-## Authentication
-
-The API is protected with JWT authentication. Use the following credentials to log in:
-
-- *Username*: admin
-- *Password*: admin
-
-Once logged in, a JWT token will be returned, which must be included in the Authorization header for subsequent API requests.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## ✅ *How to Run the Project*  
+### *Step 1: Clone the Repository*  
+```bash
+git clone <repository-link>
+cd Sales-Management-App
