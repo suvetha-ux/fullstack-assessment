@@ -1,20 +1,23 @@
-import React, { useState } from 'react';
-import AddSale from './components/AddSale.jsx';
-import SalesList from './SalesList.jsx';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import SalesManagement from './pages/SalesManagement';
+import AddSale from './components/AddSale';
+import ViewSale from './components/ViewSale';
+import EditSale from './components/EditSale';
 
 function App() {
-  const [refresh, setRefresh] = useState(false);
-
-  const handleSaleAdded = () => {
-    setRefresh(!refresh);
-  };
-
   return (
-    <div className="container mt-5">
-      <h1>Sales Management App</h1>
-      <AddSale onSaleAdded={handleSaleAdded} />
-      <SalesList refresh={refresh} />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/sales-management" element={<SalesManagement />} />
+        <Route path="/add-sale" element={<AddSale />} />
+        <Route path="/view-sale/:id" element={<ViewSale />} />
+        <Route path="/edit-sale/:id" element={<EditSale />} />
+        <Route path="*" element={<h2>404 - Page Not Found</h2>} />
+      </Routes>
+    </Router>
   );
 }
 

@@ -1,12 +1,19 @@
-// authMiddleware.js
-// Temporary middleware to bypass JWT verification.
-// This middleware simply attaches a dummy user object to the request for testing purposes.
-// Remember to replace this with proper JWT verification in production.
+const jwt = require('jsonwebtoken');
 
-const dummyAuth = (req, res, next) => {
-  // Attach a dummy user. You can expand this object as needed.
-  req.user = { username: "dummyUser" };
-  next();
+const authMiddleware = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ message: 'Invalid Token' });
+  }
 };
 
-module.exports = dummyAuth;
+module.exports = authMiddleware;

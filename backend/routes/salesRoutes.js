@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Sale = require('../models/Sales.js');
+const authMiddleware = require('../middleware/authMiddleware');
+
+router.use(authMiddleware);
 
 /**
  * @swagger
@@ -17,52 +20,28 @@ const Sale = require('../models/Sales.js');
  *             properties:
  *               productName:
  *                 type: string
- *                 example: "Laptop"
  *               quantity:
  *                 type: number
- *                 example: 5
  *               price:
  *                 type: number
- *                 example: 1000
  *     responses:
  *       201:
  *         description: Sale added successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                 productName:
- *                   type: string
- *                 quantity:
- *                   type: number
- *                 price:
- *                   type: number
  *       400:
- *         description: All fields are required
- *       500:
- *         description: Failed to add sale. Please try again.
+ *         description: Invalid request
  */
 router.post('/', async (req, res) => {
     const { productName, quantity, price } = req.body;
 
-    // Validate all fields
     if (!productName || !quantity || !price) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
     try {
-        // Create the sale record
         const sale = await Sale.create({ productName, quantity, price });
         res.status(201).json(sale);
     } catch (error) {
-        console.error('❌ Error adding sale:', error.message);
-        res.status(500).json({
-            message: 'Failed to add sale. Please try again.',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Failed to add sale. Please try again.' });
     }
 });
 
@@ -75,34 +54,93 @@ router.post('/', async (req, res) => {
  *     responses:
  *       200:
  *         description: Successfully retrieved sales
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                   productName:
- *                     type: string
- *                   quantity:
- *                     type: number
- *                   price:
- *                     type: number
- *       500:
- *         description: Failed to fetch sales
  */
 router.get('/', async (req, res) => {
     try {
         const sales = await Sale.find();
         res.status(200).json(sales);
     } catch (error) {
-        console.error('❌ Error fetching sales:', error.message);
-        res.status(500).json({
-            message: 'Failed to fetch sales',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Failed to fetch sales' });
+    }
+});
+/**
+ * @swagger
+ * /api/sales/{id}:
+ *   get:
+ *     summary: Get a specific sale by ID
+ *     description: Retrieve a single sale record by its ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the sale to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved sale
+ *       404:
+ *         description: Sale not found
+ */
+router.get('/:id', async (req, res) => {
+    try {
+        const sale = await Sale.findById(req.params.id);
+        if (!sale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
+        res.status(200).json(sale);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to fetch sale' });
+    }
+});
+
+/**
+ * @swagger
+ * /api/sales/{id}:
+ *   put:
+ *     summary: Update a sale by ID
+ *     description: Update a sale record by its ID (including productName)
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the sale to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productName:
+ *                 type: string
+ *               quantity:
+ *                 type: number
+ *               price:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Successfully updated sale
+ *       404:
+ *         description: Sale not found
+ */
+router.put('/:id', async (req, res) => {
+    try {
+        const { productName, quantity, price } = req.body;
+        const updatedSale = await Sale.findByIdAndUpdate(req.params.id, {
+            productName,
+            quantity,
+            price
+        }, { new: true });
+
+        if (!updatedSale) {
+            return res.status(404).json({ message: 'Sale not found' });
+        }
+        res.status(200).json(updatedSale);
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update sale' });
     }
 });
 
@@ -111,39 +149,29 @@ router.get('/', async (req, res) => {
  * /api/sales/{id}:
  *   delete:
  *     summary: Delete a sale by ID
- *     description: Remove a specific sale record from the database
+ *     description: Delete a sale record by its ID
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
+ *         description: ID of the sale to delete
  *         schema:
  *           type: string
- *         description: The sale ID
  *     responses:
  *       200:
- *         description: Sale deleted successfully
+ *         description: Successfully deleted sale
  *       404:
  *         description: Sale not found
- *       500:
- *         description: Failed to delete sale
  */
 router.delete('/:id', async (req, res) => {
-    const { id } = req.params;
-
     try {
-        const sale = await Sale.findByIdAndDelete(id);
-
+        const sale = await Sale.findByIdAndDelete(req.params.id);
         if (!sale) {
             return res.status(404).json({ message: 'Sale not found' });
         }
-
         res.status(200).json({ message: 'Sale deleted successfully' });
     } catch (error) {
-        console.error('❌ Error deleting sale:', error.message);
-        res.status(500).json({
-            message: 'Failed to delete sale',
-            error: error.message
-        });
+        res.status(500).json({ message: 'Failed to delete sale' });
     }
 });
 

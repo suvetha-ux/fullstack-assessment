@@ -1,57 +1,49 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function AddSale({ onSaleAdded }) {
+const AddSale = () => {
   const [productName, setProductName] = useState('');
-  const [quantity, setQuantity] = useState('');
   const [price, setPrice] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
 
-  const handleSubmit = async (e) => {
+  const handleAddSale = async (e) => {
     e.preventDefault();
-    
-    if (!productName || !quantity || !price) {
-      alert('All fields are required');
-      return;
-    }
 
     try {
       const response = await axios.post('http://localhost:5000/api/sales', {
         productName,
-        quantity: parseInt(quantity),  // Ensure quantity is a number
-        price: parseFloat(price)       // Ensure price is a float
+        price,
+        quantity
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       });
 
       if (response.status === 201) {
         alert('Sale added successfully');
-        onSaleAdded();  // Refresh sales list after adding
-        setProductName('');
-        setQuantity('');
-        setPrice('');
+        navigate('/sales-management');
       }
     } catch (error) {
-      console.error('Failed to add sale:', error.response?.data?.message || error.message);
-      alert('Failed to add sale. Please try again.');
+      console.error('Failed to add sale:', error);
+      alert('Failed to add sale');
     }
   };
 
   return (
     <div>
       <h2>Add Sale</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleAddSale}>
         <div>
           <label>Product Name:</label>
           <input 
             type="text" 
             value={productName} 
             onChange={(e) => setProductName(e.target.value)} 
-          />
-        </div>
-        <div>
-          <label>Quantity:</label>
-          <input 
-            type="number" 
-            value={quantity} 
-            onChange={(e) => setQuantity(e.target.value)} 
+            required 
           />
         </div>
         <div>
@@ -60,12 +52,22 @@ function AddSale({ onSaleAdded }) {
             type="number" 
             value={price} 
             onChange={(e) => setPrice(e.target.value)} 
+            required 
+          />
+        </div>
+        <div>
+          <label>Quantity:</label>
+          <input 
+            type="number" 
+            value={quantity} 
+            onChange={(e) => setQuantity(e.target.value)} 
+            required 
           />
         </div>
         <button type="submit">Add Sale</button>
       </form>
     </div>
   );
-}
+};
 
 export default AddSale;

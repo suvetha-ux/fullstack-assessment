@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv').config();
 const cors = require('cors');
 const salesRoutes = require('./routes/salesRoutes');
+const authRoutes = require('./routes/authRoutes');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const path = require('path');
 
 const app = express();
 
@@ -39,7 +39,7 @@ const swaggerOptions = {
             }
         ]
     },
-    apis: [path.join(__dirname, './routes/*.js')] // This will correctly find the route files
+    apis: ['./routes/*.js']
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
@@ -54,7 +54,8 @@ app.get('/', (req, res) => {
 });
 
 // Routes
-app.use('/api/sales', salesRoutes);
+app.use('/api/auth', authRoutes); // Login API
+app.use('/api/sales', salesRoutes); // Sales CRUD API
 
 // Start Server
 const PORT = process.env.PORT || 5000;

@@ -1,22 +1,41 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-
+const express = require('express');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
-// Static credentials
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin";
+const JWT_SECRET = process.env.JWT_SECRET || 'my secret key';
 
-// Login route
-router.post("/login", (req, res) => {
+/**
+ * @swagger
+ * /api/auth/login:
+ *   post:
+ *     summary: Login with username and password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Successful login
+ *       401:
+ *         description: Invalid credentials
+ */
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
-
-  if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-    // Generate a JWT token
-    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    res.json({ token });
+  
+  // Hardcoded username and password
+  if (username === 'admin' && password === 'admin') {
+    const token = jwt.sign({ username }, JWT_SECRET, { expiresIn: '1h' });
+    return res.status(200).json({ token });
   } else {
-    res.status(401).json({ message: "Invalid credentials" });
+    return res.status(401).json({ message: 'Invalid username or password' });
   }
 });
 
