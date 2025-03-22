@@ -24,7 +24,7 @@ mongoose.connect(process.env.MONGO_URI, {
     console.log('❌ MongoDB Connection Failed:', err);
 });
 
-// Swagger Configuration
+// Swagger Configuration (✅ Now Supports JWT Authentication)
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
@@ -37,7 +37,17 @@ const swaggerOptions = {
             {
                 url: 'http://localhost:5000'
             }
-        ]
+        ],
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        },
+        security: [{ BearerAuth: [] }] // Apply globally to secure routes
     },
     apis: ['./routes/*.js']
 };

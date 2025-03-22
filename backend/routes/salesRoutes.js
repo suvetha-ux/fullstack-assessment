@@ -11,6 +11,8 @@ router.use(authMiddleware);
  *   post:
  *     summary: Create a new sale
  *     description: Add a new sale record to the database
+ *     security:
+ *       - BearerAuth: []  # ✅ Requires JWT Token
  *     requestBody:
  *       required: true
  *       content:
@@ -29,6 +31,8 @@ router.use(authMiddleware);
  *         description: Sale added successfully
  *       400:
  *         description: Invalid request
+ *       401:
+ *         description: Unauthorized - JWT Token required
  */
 router.post('/', async (req, res) => {
     const { productName, quantity, price } = req.body;
@@ -51,9 +55,13 @@ router.post('/', async (req, res) => {
  *   get:
  *     summary: Retrieve all sales
  *     description: Retrieve a list of all sales records
+ *     security:
+ *       - BearerAuth: []  # ✅ Requires JWT Token
  *     responses:
  *       200:
  *         description: Successfully retrieved sales
+ *       401:
+ *         description: Unauthorized - JWT Token required
  */
 router.get('/', async (req, res) => {
     try {
@@ -63,12 +71,15 @@ router.get('/', async (req, res) => {
         res.status(500).json({ message: 'Failed to fetch sales' });
     }
 });
+
 /**
  * @swagger
  * /api/sales/{id}:
  *   get:
  *     summary: Get a specific sale by ID
  *     description: Retrieve a single sale record by its ID
+ *     security:
+ *       - BearerAuth: []  # ✅ Requires JWT Token
  *     parameters:
  *       - in: path
  *         name: id
@@ -79,8 +90,8 @@ router.get('/', async (req, res) => {
  *     responses:
  *       200:
  *         description: Successfully retrieved sale
- *       404:
- *         description: Sale not found
+ *       401:
+ *         description: Unauthorized - JWT Token required
  */
 router.get('/:id', async (req, res) => {
     try {
@@ -94,38 +105,6 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/sales/{id}:
- *   put:
- *     summary: Update a sale by ID
- *     description: Update a sale record by its ID (including productName)
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the sale to update
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               productName:
- *                 type: string
- *               quantity:
- *                 type: number
- *               price:
- *                 type: number
- *     responses:
- *       200:
- *         description: Successfully updated sale
- *       404:
- *         description: Sale not found
- */
 router.put('/:id', async (req, res) => {
     try {
         const { productName, quantity, price } = req.body;
@@ -144,25 +123,6 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-/**
- * @swagger
- * /api/sales/{id}:
- *   delete:
- *     summary: Delete a sale by ID
- *     description: Delete a sale record by its ID
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         description: ID of the sale to delete
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Successfully deleted sale
- *       404:
- *         description: Sale not found
- */
 router.delete('/:id', async (req, res) => {
     try {
         const sale = await Sale.findByIdAndDelete(req.params.id);
